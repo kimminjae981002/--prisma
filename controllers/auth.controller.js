@@ -124,7 +124,7 @@ export class AuthController {
         },
       );
 
-      res.header('authorization', `Bearer ${accessToken}`);
+      res.cookie('accessToken', `${accessToken}`);
 
       return res.status(200).json({
         success: true,

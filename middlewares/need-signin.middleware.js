@@ -3,31 +3,30 @@ import { JWT_ACCESS_TOKEN_SECRET } from '../constants/security.costant.js';
 
 export const needSignin = async (req, res, next) => {
   try {
-    const authorizationHeader = req.cookies.authorization;
-    console.log(req.cookies);
+    const accessToken = req.cookies.accessToken;
     // headers로 하면 안 들어옴
-    if (!authorizationHeader) {
+    if (!accessToken) {
       return res.status(400).json({
         success: false,
         message: '인증 정보가 없습니다.',
       });
     }
 
-    const [tokenType, accessToken] = authorizationHeader.split(' ');
+    // const [tokenType, accessToken] = authorizationHeader.split(' ');
 
-    if (tokenType !== 'Bearer') {
-      return res.status(400).json({
-        success: false,
-        message: '지원하지 않는 인증 방식입니다.',
-      });
-    }
+    // if (tokenType !== 'Bearer') {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: '지원하지 않는 인증 방식입니다.',
+    //   });
+    // }
 
-    if (!accessToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'AccessToken이 없습니다.',
-      });
-    }
+    // if (!accessToken) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'AccessToken이 없습니다.',
+    //   });
+    // }
 
     const decodedPayload = jwt.verify(accessToken, JWT_ACCESS_TOKEN_SECRET);
     // const { userId } = decodedPayload;

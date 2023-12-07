@@ -13,4 +13,38 @@ export class ProductRepository {
 
     return product;
   };
+
+  getAllProducts = async () => {
+    const products = await prisma.products.findMany();
+
+    return products;
+  };
+
+  getProduct = async (productId) => {
+    const product = await prisma.products.findFirst({
+      where: { productId: +productId },
+    });
+
+    return product;
+  };
+
+  updateProduct = async (productId, title, description, status) => {
+    const product = await prisma.products.update({
+      where: { productId: +productId },
+      data: {
+        title,
+        description,
+        status,
+      },
+    });
+
+    return product;
+  };
+
+  deleteProduct = async (productId) => {
+    const product = await prisma.products.delete({
+      where: { productId: +productId },
+    });
+    return product;
+  };
 }

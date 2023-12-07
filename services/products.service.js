@@ -1,4 +1,5 @@
 import { ProductRepository } from '../repositories/products.repository.js';
+
 export class ProductsService {
   ProductRepository = new ProductRepository();
 
@@ -16,5 +17,43 @@ export class ProductsService {
       description: product.description,
       status: product.status,
     };
+  };
+
+  getAllProducts = async () => {
+    const products = await this.ProductRepository.getAllProducts();
+
+    return products;
+  };
+
+  getProduct = async (productId) => {
+    const product = await this.ProductRepository.getProduct(productId);
+
+    return product;
+  };
+
+  updateProduct = async (productId, title, description, status) => {
+    const product = await this.ProductRepository.getProduct(productId);
+
+    await this.ProductRepository.updateProduct(
+      productId,
+      title,
+      description,
+      status,
+    );
+
+    const updateProduct = await this.ProductRepository.getProduct(productId);
+
+    return {
+      productId: updateProduct.productId,
+      title: updateProduct.title,
+      description: updateProduct.description,
+      status: updateProduct.status,
+    };
+  };
+
+  deleteProduct = async (productId) => {
+    const product = await this.ProductRepository.deleteProduct(productId);
+
+    return product;
   };
 }
