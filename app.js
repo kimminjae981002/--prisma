@@ -1,9 +1,11 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 // import { SERVER_PORT } from './constants/app.constant.js';
 import { apiRouter } from './routers/index.js';
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', apiRouter);

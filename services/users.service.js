@@ -1,5 +1,5 @@
 import { UserRepository } from '../repositories/users.repository.js';
-import { prisma } from '../utils/prisma/index.js';
+
 export class UsersService {
   UserRepository = new UserRepository();
 
@@ -17,5 +17,11 @@ export class UsersService {
       cretaedAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  };
+
+  findUser = async (email) => {
+    const user = await this.UserRepository.findByEmail(email);
+
+    return user;
   };
 }

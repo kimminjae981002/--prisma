@@ -89,7 +89,8 @@ authRouter.post('/signup', authController.signUp);
 // });
 
 // 로그인
-// authRouter.post('/signin', async (req, res) => {
+authRouter.post('/signin', authController.signIn);
+// async (req, res) => {
 //   try {
 //     const { email, password } = req.body;
 

@@ -1,19 +1,16 @@
 import { UsersService } from '../services/users.service.js';
-import { prisma } from '../utils/prisma/index.js';
-
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import {
+  JWT_ACCESS_TOKEN_SECRET,
+  JWT_ACCESS_TOKEN_EXPIRES_IN,
+} from '../constants/security.costant.js';
 export class AuthController {
   UsersService = new UsersService();
 
   signUp = async (req, res, next) => {
     try {
       const { email, name, password, passwordConfirm } = req.body;
-
-      const newUser = await this.UsersService.signUp(
-        email,
-        name,
-        password,
-        passwordConfirm,
-      );
 
       if (!email) {
         return res.status(400).json({
@@ -66,6 +63,22 @@ export class AuthController {
         });
       }
 
+      const existedUser = await this.UsersService.findUser(email);
+
+      if (existedUser) {
+        return res.status(400).json({
+          success: false,
+          message: '이미 가입 된 이메일입니다.',
+        });
+      }
+
+      const newUser = await this.UsersService.signUp(
+        email,
+        name,
+        password,
+        passwordConfirm,
+      );
+
       return res.status(201).json({
         success: true,
         message: '회원가입에 성공했습니다.',
@@ -73,6 +86,57 @@ export class AuthController {
       });
     } catch (error) {
       next(error); // error핸들링 미들웨어로 보낸다/
+    }
+  };
+
+  signIn = async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: '이메일 입력이 필요합니다.',
+        });
+      }
+
+      if (!password) {
+        return res.status(400).json({
+          success: false,
+          message: '비밀번호 입력이 필요합니다.',
+        });
+      }
+
+      const user = await this.UsersService.findUser(email);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: '사용자가 존재하지 않습니다.',
+        });
+      }
+
+      const accessToken = jwt.sign(
+        { userId: user.userId },
+        JWT_ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN,
+        },
+      );
+
+      res.header('authorization', `Bearer ${accessToken}`);
+
+      return res.status(200).json({
+        success: true,
+        message: '로그인에 성공했습니다.',
+        data: { accessToken },
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: '예상치 못한 에러가 발생하였습니다. 관리자에게 문의하세요.',
+      });
     }
   };
 }
