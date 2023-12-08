@@ -10,6 +10,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', apiRouter);
 
+app.get('/', (req, res) => {
+  res.send('hello world');
+});
+
 app.listen(3000, () => {
   console.log(`3000포트로 서버가 실행됐습니다.`);
 });
