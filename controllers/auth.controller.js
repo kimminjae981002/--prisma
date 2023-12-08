@@ -63,7 +63,7 @@ export class AuthController {
         });
       }
 
-      const existedUser = await this.UsersService.findUser(email);
+      const existedUser = await this.UsersService.findByEmail(email);
 
       if (existedUser) {
         return res.status(400).json({
@@ -71,11 +71,12 @@ export class AuthController {
           message: '이미 가입 된 이메일입니다.',
         });
       }
+      const hashedPassword = bcrypt.hashSync(password, 10);
 
       const newUser = await this.UsersService.signUp(
         email,
         name,
-        password,
+        hashedPassword,
         passwordConfirm,
       );
 
@@ -107,7 +108,7 @@ export class AuthController {
         });
       }
 
-      const user = await this.UsersService.findUser(email);
+      const user = await this.UsersService.findByEmail(email);
 
       if (!user) {
         return res.status(404).json({
@@ -123,8 +124,13 @@ export class AuthController {
           expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN,
         },
       );
-
-      res.cookie('accessToken', `${accessToken}`);
+      const isPasswordMatched = bcrypt.compareSync(password, user.password);
+      if (!isPasswordMatched) {
+        return res.status(400).json({
+          message: '비밀번호가 틀립니다.',
+        });
+      }
+      res.header('authorization', `Bearer ${accessToken}`);
 
       return res.status(200).json({
         success: true,

@@ -28,8 +28,24 @@ export class ProductRepository {
     return product;
   };
 
+  getProductTitle = async (title) => {
+    const product = await prisma.products.findFirst({
+      where: { title },
+    });
+
+    return product;
+  };
+
   updateProduct = async (productId, title, description, status) => {
-    const product = await prisma.products.update({
+    const product = await prisma.products.findUnique({
+      where: { productId: +productId },
+    });
+
+    if (!product) {
+      throw Error('페이지를 조회할 수 없습니다.');
+    }
+
+    const updatedProduct = await prisma.products.update({
       where: { productId: +productId },
       data: {
         title,
@@ -38,13 +54,21 @@ export class ProductRepository {
       },
     });
 
-    return product;
+    return updatedProduct;
   };
 
   deleteProduct = async (productId) => {
-    const product = await prisma.products.delete({
+    const product = await prisma.products.findUnique({
       where: { productId: +productId },
     });
-    return product;
+
+    if (!product) {
+      throw Error('페이지를 조회할 수 없습니다.');
+    }
+
+    const deletedProduct = await prisma.products.delete({
+      where: { productId: +productId },
+    });
+    return deletedProduct;
   };
 }

@@ -5,6 +5,9 @@ export class ProductController {
   createdProduct = async (req, res, next) => {
     try {
       const { title, description, status } = req.body;
+      const user = res.locals.user;
+      const id = user.userId;
+      const name = user.name;
 
       if (!title) {
         return res.status(400).json({
@@ -20,8 +23,25 @@ export class ProductController {
         });
       }
 
+      const isValidStatus = status
+        ? status === '판매 중' || status === '판매 종료'
+        : true;
+
+      if (!isValidStatus) {
+        return res.status(400).json({
+          success: false,
+          message: '지원하지 않는 상태입니다. (status: 판매중 | 판매 종료)',
+        });
+      }
+
+      const exitstProduct = await this.ProductsService.getProductTitle(title);
+
+      if (exitstProduct) {
+        return res.status(400).json({ message: '이미 존재하는 상품입니다.' });
+      }
+
       const product = await this.ProductsService.createProduct(
-        res.locals.user,
+        id,
         title,
         description,
         status,
@@ -29,7 +49,7 @@ export class ProductController {
       return res.status(201).json({
         success: true,
         message: '상품 생성에 성공했습니다.',
-        data: product,
+        data: { ...product, name },
       });
     } catch (error) {
       console.error(error);
@@ -42,13 +62,19 @@ export class ProductController {
 
   getAllProducts = async (req, res, next) => {
     try {
-      // const { sort } = req.query;
-      // let upperCaseSort = sort?.toUpperCase();
-      // if (upperCaseSort !== 'ASC' && upperCaseSort !== 'DESC') {
-      //   upperCaseSort = 'DESC';
-      // }
+      const { sort } = req.query;
+      let upperCaseSort = sort?.toUpperCase();
+      if (upperCaseSort !== 'ASC' && upperCaseSort !== 'DESC') {
+        upperCaseSort = 'DESC';
+      }
 
       const products = await this.ProductsService.getAllProducts();
+
+      if (!products) {
+        return res.status(404).json({
+          message: '상품을 조회할 수 없습니다.',
+        });
+      }
 
       return res.status(200).json({
         success: true,
@@ -72,7 +98,7 @@ export class ProductController {
       if (!product) {
         return res.status(404).json({
           success: false,
-          message: '상품이 존재하지 않습니다.',
+          message: '상품을 조회할 수 없습니다.',
         });
       }
 
@@ -93,7 +119,23 @@ export class ProductController {
   updateProduct = async (req, res, next) => {
     try {
       const { productId } = req.params;
-      const { password, title, description, status } = req.body;
+      const { title, description, status, password } = req.body;
+      const user = res.locals.user;
+
+      if (password !== user.password) {
+        return res.status(400).json({ message: '수정 권한이 없습니다.' });
+      }
+
+      const isValidStatus = status
+        ? status === '판매 중' || status === '판매 종료'
+        : true;
+
+      if (!isValidStatus) {
+        return res.status(400).json({
+          success: false,
+          message: '지원하지 않는 상태입니다. (status: 판매중 | 판매 종료)',
+        });
+      }
 
       const updatedProduct = await this.ProductsService.updateProduct(
         productId,
@@ -111,8 +153,14 @@ export class ProductController {
   deleteProduct = async (req, res, next) => {
     try {
       const { productId } = req.params;
-
+      const { password } = req.body;
       const product = await this.ProductsService.getProduct(productId);
+
+      const user = res.locals.user;
+
+      if (password !== user.password) {
+        return res.status(400).json({ message: '수정 권한이 없습니다.' });
+      }
 
       if (!product) {
         return res.status(404).json({ message: '상품을 조회할 수 없습니다.' });

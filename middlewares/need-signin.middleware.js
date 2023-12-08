@@ -1,35 +1,33 @@
 import jwt from 'jsonwebtoken';
 import { JWT_ACCESS_TOKEN_SECRET } from '../constants/security.costant.js';
+import { UsersService } from '../services/users.service.js';
 
 export const needSignin = async (req, res, next) => {
+  const usersService = new UsersService();
   try {
-    const accessToken = req.cookies.accessToken;
+    const { authorization } = req.headers;
     // headers로 하면 안 들어옴
-    if (!accessToken) {
+
+    const [tokenType, accessToken] = authorization.split(' ');
+
+    if (tokenType !== 'Bearer') {
       return res.status(400).json({
         success: false,
-        message: '인증 정보가 없습니다.',
+        message: '지원하지 않는 인증 방식입니다.',
       });
     }
 
-    // const [tokenType, accessToken] = authorizationHeader.split(' ');
-
-    // if (tokenType !== 'Bearer') {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: '지원하지 않는 인증 방식입니다.',
-    //   });
-    // }
-
-    // if (!accessToken) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: 'AccessToken이 없습니다.',
-    //   });
-    // }
+    if (!accessToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'AccessToken이 없습니다.',
+      });
+    }
 
     const decodedPayload = jwt.verify(accessToken, JWT_ACCESS_TOKEN_SECRET);
-    // const { userId } = decodedPayload;
+    const { userId } = decodedPayload;
+
+    const user = await usersService.findByUserId(userId);
 
     // 일치 하는 userId가 없는 경우
     // const user = (await Users.findByPk(userId)).toJSON();
@@ -42,7 +40,7 @@ export const needSignin = async (req, res, next) => {
     // }
 
     // delete user.password;
-    res.locals.user = decodedPayload.userId;
+    res.locals.user = user;
 
     next();
   } catch (error) {

@@ -19,8 +19,14 @@ export class UsersService {
     };
   };
 
-  findUser = async (email) => {
+  findByEmail = async (email) => {
     const user = await this.UserRepository.findByEmail(email);
+
+    return user;
+  };
+
+  findByUserId = async (userId) => {
+    const user = await this.UserRepository.findByUserId(userId);
 
     return user;
   };

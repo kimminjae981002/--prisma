@@ -31,6 +31,12 @@ export class ProductsService {
     return product;
   };
 
+  getProductTitle = async (title) => {
+    const product = await this.ProductRepository.getProductTitle(title);
+
+    return product;
+  };
+
   updateProduct = async (productId, title, description, status) => {
     const product = await this.ProductRepository.getProduct(productId);
 
