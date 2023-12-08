@@ -12,31 +12,10 @@ export class AuthController {
     try {
       const { email, name, password, passwordConfirm } = req.body;
 
-      if (!email) {
+      if (!email || !password || !passwordConfirm || !name) {
         return res.status(400).json({
           success: false,
-          message: '이메일 입력이 필요합니다.',
-        });
-      }
-
-      if (!password) {
-        return res.status(400).json({
-          success: false,
-          message: '비밀번호 입력이 필요합니다.',
-        });
-      }
-
-      if (!passwordConfirm) {
-        return res.status(400).json({
-          success: false,
-          message: '비밀번호 확인 입력이 필요합니다.',
-        });
-      }
-
-      if (!name) {
-        return res.status(400).json({
-          success: false,
-          message: '이름 입력이 필요합니다.',
+          message: '빈칸을 채워주세요.',
         });
       }
 
@@ -94,17 +73,10 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      if (!email) {
+      if ((!email, !password)) {
         return res.status(400).json({
           success: false,
-          message: '이메일 입력이 필요합니다.',
-        });
-      }
-
-      if (!password) {
-        return res.status(400).json({
-          success: false,
-          message: '비밀번호 입력이 필요합니다.',
+          message: '빈칸을 채워주세요.',
         });
       }
 

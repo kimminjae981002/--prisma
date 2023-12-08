@@ -1,5 +1,5 @@
 import { ProductsService } from '../services/products.service.js';
-
+import bcrypt from 'bcrypt';
 export class ProductController {
   ProductsService = new ProductsService();
   createdProduct = async (req, res, next) => {
@@ -9,28 +9,10 @@ export class ProductController {
       const id = user.userId;
       const name = user.name;
 
-      if (!title) {
+      if (!title || !description) {
         return res.status(400).json({
           success: false,
-          message: '제목 입력이 필요합니다.',
-        });
-      }
-
-      if (!description) {
-        return res.status(400).json({
-          success: false,
-          message: '설명 입력이 필요합니다.',
-        });
-      }
-
-      const isValidStatus = status
-        ? status === '판매 중' || status === '판매 종료'
-        : true;
-
-      if (!isValidStatus) {
-        return res.status(400).json({
-          success: false,
-          message: '지원하지 않는 상태입니다. (status: 판매중 | 판매 종료)',
+          message: '빈칸을 채워주세요.',
         });
       }
 
@@ -105,9 +87,9 @@ export class ProductController {
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({
+      return res.status(404).json({
         success: false,
-        message: '예상치 못한 에러가 발생하였습니다. 관리자에게 문의하세요.',
+        message: '페이지를 찾을 수 없습니다.',
       });
     }
   };
@@ -118,7 +100,15 @@ export class ProductController {
       const { title, description, status, password } = req.body;
       const user = res.locals.user;
 
-      if (password !== user.password) {
+      const product = await this.ProductsService.getProduct(productId);
+
+      if (!product) {
+        return res.status(404).json({ message: '상품을 조회할 수 없습니다.' });
+      }
+
+      const isPasswordMatched = bcrypt.compareSync(password, user.password);
+
+      if (!isPasswordMatched) {
         return res.status(400).json({ message: '수정 권한이 없습니다.' });
       }
 
@@ -154,7 +144,9 @@ export class ProductController {
 
       const user = res.locals.user;
 
-      if (password !== user.password) {
+      const isPasswordMatched = bcrypt.compareSync(password, user.password);
+
+      if (!isPasswordMatched) {
         return res.status(400).json({ message: '수정 권한이 없습니다.' });
       }
 

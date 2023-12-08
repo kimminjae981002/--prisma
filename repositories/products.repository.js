@@ -45,10 +45,7 @@ export class ProductRepository {
       where: { title },
     });
 
-    if (!product) {
-      throw Error('페이지를 조회할 수 없습니다.');
-    }
-
+    console.log(product);
     return product;
   };
 
