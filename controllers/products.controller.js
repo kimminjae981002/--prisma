@@ -63,12 +63,8 @@ export class ProductController {
   getAllProducts = async (req, res, next) => {
     try {
       const { sort } = req.query;
-      let upperCaseSort = sort?.toUpperCase();
-      if (upperCaseSort !== 'ASC' && upperCaseSort !== 'DESC') {
-        upperCaseSort = 'DESC';
-      }
 
-      const products = await this.ProductsService.getAllProducts();
+      const products = await this.ProductsService.getAllProducts(sort);
 
       if (!products) {
         return res.status(404).json({

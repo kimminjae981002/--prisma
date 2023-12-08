@@ -19,8 +19,8 @@ export class ProductsService {
     };
   };
 
-  getAllProducts = async () => {
-    const products = await this.ProductRepository.getAllProducts();
+  getAllProducts = async (sort) => {
+    const products = await this.ProductRepository.getAllProducts(sort);
 
     return products;
   };
